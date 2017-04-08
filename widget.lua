@@ -86,9 +86,9 @@ local function factory(args)
         main_slider.pulseaudio_device:set_volume(main_slider.value)
     end)
 
-    function main_slider:updateVolume()
-        pactl.get_devices(function (deviceList)
-            for _, device in ipairs(deviceList) do
+    function main_slider:update_volume()
+        pactl.get_devices(function (device_list)
+            for _, device in ipairs(device_list) do
                 if device.id == 0 and device.type == "Sink" then
                     self.value = device.volume
                     self.pulseaudio_device = device
@@ -97,7 +97,7 @@ local function factory(args)
         end)
     end
     -- update once at creation time
-    main_slider:updateVolume()
+    main_slider:update_volume()
 
 
 
@@ -105,7 +105,7 @@ local function factory(args)
     main_slider:connect_signal("mouse::enter", function(other, geo)
         -- make sure only one instance of the wibox is created
         if tooltip and tooltip.visible then return end
-        pactl.get_devices(function (deviceList)
+        pactl.get_devices(function (device_list)
             local wibox_height = 0
             local slider_height = 20
             local slider_width = 100
@@ -114,7 +114,7 @@ local function factory(args)
                 forced_width = slider_width,
                 layout  = wibox.layout.flex.vertical
             }
-            for i, device in ipairs(deviceList) do
+            for i, device in ipairs(device_list) do
                 local textbox = wibox.widget.textbox()
                 local slider
                 if device.id == 0 and device.type == "Sink" then
@@ -127,7 +127,7 @@ local function factory(args)
                         device:set_volume(slider.value)
                     end)
                 end
-                local deviceWidget = wibox.widget {
+                local device_widget = wibox.widget {
                     textbox,
                     wibox.widget.textbox(""),
                     slider,
@@ -137,7 +137,7 @@ local function factory(args)
                     device.description or device.app_binary or ""
                 local n_w = textbox:get_preferred_size(mouse.screen)
                 n_w_max = (n_w > n_w_max) and n_w or n_w_max
-                sliders:add(deviceWidget)
+                sliders:add(device_widget)
                 wibox_height = wibox_height + slider_height
             end
 
@@ -153,7 +153,7 @@ local function factory(args)
 
     -- Set up a timer to refresh main_slider every `timeout` seconds
     local mytimer = timer({ timeout = timeout })
-    mytimer:connect_signal("timeout", function() main_slider:updateVolume() end)
+    mytimer:connect_signal("timeout", function() main_slider:update_volume() end)
     mytimer:start()
 
     return wibox.widget {

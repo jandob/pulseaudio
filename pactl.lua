@@ -20,7 +20,6 @@ end
 function Device:parse_info()
     local info = self.info
     local active_port = string.match(info, "Active Port: (.-)\n")
-    --local ports =  string.match(info, "Ports:.-Active Port")
     local active_port_description = nil
     if active_port then
         -- escape magic characters
@@ -51,10 +50,10 @@ function pulseaudio.get_devices(callback)
 
         -- discover devices
         for line in string.gmatch(stdout, "(.-\n)") do
-            local i,_,deviceType,id = string.find(line,"(%w+.-) #(%d+)")
+            local i,_,device_type,id = string.find(line,"(%w+.-) #(%d+)")
             if i == 1 then -- new device
                 current_device = {
-                    type = deviceType,
+                    type = device_type,
                     id = tonumber(id),
                     info = "",
                 }
@@ -66,15 +65,15 @@ function pulseaudio.get_devices(callback)
                 current_device.info = current_device.info .. line
             end
         end
-        local filteredDevices = {}
+        local filtered_devices = {}
         for i, device in ipairs(devices) do
             device:parse_info()
             -- filter out unwanted devices
             if device.volume and device.type ~= "Source Output" then
-                filteredDevices[#filteredDevices + 1] = device
+                filtered_devices[#filtered_devices + 1] = device
             end
         end
-        callback(filteredDevices)
+        callback(filtered_devices)
     end)
 end
 return pulseaudio
