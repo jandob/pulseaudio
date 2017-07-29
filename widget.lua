@@ -29,7 +29,7 @@ local function tooltip_wibox(args)
     }
     -- since we cannot check if the mouse leaves the parent_widget and
     -- enters the tooltip wibox, we use a timer for closing the wibox
-    local close_timer = gears.timer({ timeout = 0.5, })
+    local close_timer = gears.timer({ timeout = 0.1, })
     function tooltip:show(geometry)
         close_timer:connect_signal("timeout", function ()
             if array_has_value(mouse.current_widgets, args.parent_widget) or
